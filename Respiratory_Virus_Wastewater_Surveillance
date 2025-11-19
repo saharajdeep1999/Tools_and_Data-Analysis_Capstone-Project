@@ -1,0 +1,70 @@
+import pandas as pd
+from scipy.stats import pearsonr
+import matplotlib.pyplot as plt
+import numpy as np
+
+wastew_df = pd.read_csv('Downloads\Respiratory_Virus_Wastewater_Surveillance.csv')
+print("Waste Water dataset shape:", wastew_df.shape)
+print(type(wastew_df))
+print(wastew_df.shape)
+
+wastew_df.head
+
+wastew_df = pd.read_csv('Downloads\Respiratory_Virus_Wastewater_Surveillance.csv')
+wastew_df.info()
+
+wastew_df.describe()
+
+# Show missing value percentages
+missing_percent = (wastew_df.isnull().sum() / len(wastew_df)) * 100
+print(missing_percent)
+wastew_df.isnull().sum()[wastew_df.isnull().sum() > 0]
+wastew_df = wastew_df.dropna(axis=1, how='all')
+
+#Check how severe the missing data is
+print("\n---- Missing Value Percentage ----")
+print((wastew_df.isnull().sum() / len(wastew_df) * 100).round(2))
+
+print(wastew_df.dtypes)
+print(wastew_df['pathogen'].unique())
+
+# Fix for text column
+if 'pathogen' in wastew_df.columns:
+    wastew_df['pathogen'] = wastew_df['pathogen'].fillna(wastew_df['pathogen'].mode()[0])
+    print("Filled missing values in 'disease' with the most frequent category.")
+
+# ~~ Example: Convert numeric columns stored as strings ~~
+numeric_columns = ['pathogen']  # adjust as per your dataset
+for col in numeric_columns:
+    if col in wastew_df.columns:
+        waste_df[col] = pd.to_numeric(waste_df[col], errors='coerce')
+        print(f"Converted '{col}' to numeric type.")
+
+# --- Identify Duplicates ---
+duplicate_count = wastew_df.duplicated().sum()
+print(f"\n---- Duplicate Rows Found: {duplicate_count} ----")
+
+# --- Remove Duplicates ---
+if duplicate_count > 0:
+    wastew_df = wastew_df.drop_duplicates()
+    print("Duplicate rows removed successfully.")
+
+# --- Verify ---
+print(f"Remaining rows after cleanup: {wastew_df.shape[0]}")
+import seaborn as sns
+
+# --- Select numeric columns only ---
+numeric_cols = wastew_df.select_dtypes(include=['float64', 'int64']).columns
+print(wastew_df['pathogen'].describe())
+print(wastew_df['pathogen'].unique())
+
+wastew_df['pathogen'] = pd.to_numeric(wastew_df['pathogen'], errors='coerce')
+print(wastew_df['pathogen'].isna().sum())
+wastew_df['pathogen'] = wastew_df['pathogen'].astype('category').cat.codes
+
+plt.figure(figsize=(7,5))
+wastew_df['pathogen'].value_counts().sort_index().plot(kind='bar', color='skyblue', edgecolor='black')
+plt.title('Frequency of Pathogenic Diseases (Numeric Codes)')
+plt.xlabel('Pathogen Code')
+plt.ylabel('Count')
+plt.show()
